@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace identityTest.Server.Controllers
 {
-    [Route("api/[controller]")]
+    
     [ApiController]
     public class UserController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : ControllerBase
     {
@@ -16,15 +18,28 @@ namespace identityTest.Server.Controllers
 
         private readonly SignInManager<AppUser> _signInManager = signInManager;
 
+        //public IEnumerable<WeatherForecast> Get()
+        //{
+        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        //    {
+        //        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+        //        TemperatureC = Random.Shared.Next(-20, 55),
+        //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+        //    })
+        //    .ToArray();
+        //}
+
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAppUsers() 
+        [Route("/[controller]/getappusers")]
+        public async Task<IResult>  GetAppUsers() 
         {
-            var users = await _userManager.Users.ToListAsync();
-            return Ok(users);
+            var users = await _userManager.Users.ToArrayAsync();
+            var serialized = JsonSerializer.Serialize(users);
+            return Results.Ok(serialized);
         }
 
         [HttpPost]
+        [Route("/[controller]/login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
             //
