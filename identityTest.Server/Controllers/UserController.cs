@@ -12,6 +12,7 @@ namespace identityTest.Server.Controllers
 {
     
     [ApiController]
+    [Produces("application/json")]
     public class UserController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager = userManager;
@@ -31,11 +32,11 @@ namespace identityTest.Server.Controllers
 
         [HttpGet]
         [Route("/[controller]/getappusers")]
-        public async Task<IResult>  GetAppUsers() 
+        public async Task<IActionResult> GetAppUsers() 
         {
-            var users = await _userManager.Users.ToArrayAsync();
-            var serialized = JsonSerializer.Serialize(users);
-            return Results.Ok(serialized);
+            var users = await _userManager.Users.ToListAsync();
+            //var serialized = JsonSerializer.Serialize(users);
+            return Ok(users);
         }
 
         [HttpPost]
