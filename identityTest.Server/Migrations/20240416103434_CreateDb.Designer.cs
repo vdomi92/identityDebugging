@@ -12,7 +12,7 @@ using identityTest.Server;
 namespace identityTest.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240411110904_CreateDb")]
+    [Migration("20240416103434_CreateDb")]
     partial class CreateDb
     {
         /// <inheritdoc />
@@ -178,9 +178,11 @@ namespace identityTest.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")

@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 
 namespace identityTest.Server.Controllers
 {
@@ -18,17 +13,6 @@ namespace identityTest.Server.Controllers
         private readonly UserManager<AppUser> _userManager = userManager;
 
         private readonly SignInManager<AppUser> _signInManager = signInManager;
-
-        //public IEnumerable<WeatherForecast> Get()
-        //{
-        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //    {
-        //        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        //        TemperatureC = Random.Shared.Next(-20, 55),
-        //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        //    })
-        //    .ToArray();
-        //}
 
         [HttpGet]
         [Route("/[controller]/getappusers")]
@@ -43,19 +27,76 @@ namespace identityTest.Server.Controllers
         [Route("/[controller]/login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
+            Microsoft.AspNetCore.Identity.SignInResult result = new();
+            // passWord12+
+            try 
+            {
+                await HttpContext.SignOutAsync(IdentityConstants.BearerScheme);
+
+                var user = await _userManager.FindByEmailAsync(loginDto.Email);
+                if (user == null)
+                {
+                    return BadRequest("Invalid login credentials");
+                    
+                }
+                else 
+                {
+                    result = await _signInManager.PasswordSignInAsync(user, loginDto.Password, true, false);
+                    if (!result.Succeeded)
+                    {
+                        return BadRequest("Invalid login credentials");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Something went wrong " + e.Message);
+            }
+
+            
+            return Ok(new { message = "Login successful", result = result });
+        }
+
+        [HttpPost]
+        [Route("/[controller]/register")]
+        public async Task<IActionResult> Register(RegisterDto registerDto)
+        {
             //
             // passWord12+
             await HttpContext.SignOutAsync(IdentityConstants.BearerScheme);
 
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            
-            if (user != null) 
+            IdentityResult result = new();
+
+            try
             {
-                var response = await _signInManager.PasswordSignInAsync(user, loginDto.Password, true, false);
-                return Ok(response);
+                AppUser user = new()
+                {
+                    Email = registerDto.Email,
+                    //PasswordHash = registerDto.Password,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName,
+                    UserName = registerDto.Email
+                };
+
+                var hashedPassword = new PasswordHasher<AppUser>().HashPassword(user, registerDto.Password);
+
+                user.PasswordHash = hashedPassword;
+
+                result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+                //PassWord2+
+            }
+            catch (Exception e)  
+            {
+                return BadRequest("Something went wrong " + e.Message);
             }
 
-            return Unauthorized();
+
+            return Ok( "Registered successfully.");
         }
     }
 }

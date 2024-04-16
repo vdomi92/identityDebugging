@@ -2,18 +2,13 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
-    //const [forecasts, setForecasts] = useState();
     const [users, setUsers] = useState();
 
-    //useEffect(() => {
-    //    populateWeatherData();
-    //}, []);
 
     useEffect(() => {
         getUsers();
     }, []);
 
-    //const contents = forecasts === undefined || users === undefined
     const contents = users === undefined
         ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
         : <>
@@ -45,14 +40,8 @@ function App() {
         </div>
     );
     
-    //async function populateWeatherData() {
-    //    const response = await fetch('weatherforecast');
-    //    const data = await response.json();
-    //    setForecasts(data);
-    //}
-
     async function getUsers() {
-        const response = await fetch('/User/getappusers')
+        const response = await fetch('user/getappusers')
         console.log(response)
         const data = await response.json();
 
